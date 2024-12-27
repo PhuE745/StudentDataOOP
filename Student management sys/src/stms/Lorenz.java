@@ -21,7 +21,7 @@ public class Lorenz {
     //String[] row = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)"); 
 //use this if your values already contain commas
     for(String index : row) {
-     System.out.printf("%-10s", index);
+     System.out.printf("%-20s", index);
     }
     System.out.println();
    }
