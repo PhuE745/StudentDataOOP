@@ -1,4 +1,5 @@
 package stms;
+
 import java.util.Scanner;
 
 public class Main {
@@ -10,6 +11,10 @@ public class Main {
         String repans;
         Delfin lagay = new Delfin();
         Lorenz kita = new Lorenz();
+        // Specify the path to your CSV file here
+        String csvFilePath = "src\\StudentInfo.csv"; // Change this to your actual file path
+        Olidan tanggal = new Olidan(csvFilePath); // Initialize Olidan with the CSV file path
+        Valenzuela hanap = new Valenzuela(csvFilePath);
 
         while (rep) {
             try {
@@ -23,26 +28,24 @@ public class Main {
                 System.out.println("======================");
                 System.out.print(" Pick a choice -> "); // Use print instead of println for better formatting
                 choice = ans.nextInt();
+                ans.nextLine(); // Consume the newline character
 
                 switch (choice) {
                     case 1:
-                        
                         System.out.println("Registering a student...");
-                        lagay.input();
-                        
+                        lagay.input(); // Assuming you have a method to register a student
                         break;
                     case 2:
-                        
                         System.out.println("Searching for a student...");
+                        hanap.search(ans);
                         break;
                     case 3:
-                        
                         System.out.println("Removing a student...");
+                        tanggal.remove(ans); // Call the remove method from Olidan
                         break;
                     case 4:
-                        
                         System.out.println("Displaying students...");
-                        kita.display();
+                        kita.display(); // Assuming you have a method to display students
                         break;
                     default:
                         System.out.println("Invalid choice. Please try again.");
