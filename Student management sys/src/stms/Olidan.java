@@ -1,66 +1,100 @@
 package stms;
 
+
 import java.io.*;
 import java.util.Scanner;
 
 public class Olidan {
     private String csvFile;
 
-    // Constructor to initialize the csvFile
     public Olidan(String csvFile) {
         this.csvFile = csvFile;
     }
 
     public void removeRecord(String nameToRemove) {
+        System.out.println("CSV File Path: " + csvFile);
         File inputFile = new File(csvFile);
-        File tempFile = new File("temp.csv");
+        System.out.println("Absolute File Path: " + inputFile.getAbsolutePath());
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+        if (!inputFile.exists()) {
+            System.out.println("ERROR: File does NOT exist: " + inputFile.getAbsolutePath());
+            return;
+        }
+        if (!inputFile.canWrite()) {
+            System.out.println("ERROR: Cannot write to file (permissions issue): " + inputFile.getAbsolutePath());
+            return;
+        }
 
-            String currentLine;
-            boolean headerWritten = false;
+        try {
+            File tempFile = File.createTempFile("temp", ".csv", new File("."));
+            System.out.println("Temp File Path: " + tempFile.getAbsolutePath());
 
-            while ((currentLine = reader.readLine()) != null) {
-                // Write the header to the temp file if it's the first line
-                if (!headerWritten) {
-                    writer.write(currentLine);
-                    writer.newLine();
-                    headerWritten = true;
-                    continue;
-                }
+            try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+                 BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
 
-                // Split the line into fields
-                String[] fields = currentLine.split(",");
+                String currentLine;
+                boolean headerWritten = false;
 
-                // Check if the name matches the one to remove
-                if (!fields[0].equalsIgnoreCase(nameToRemove)) {
-                    // If it doesn't match, write the line to the temp file
-                    writer.write(currentLine);
-                    writer.newLine();
+                while ((currentLine = reader.readLine()) != null) {
+                    if (!headerWritten) {
+                        writer.write(currentLine);
+                        writer.newLine();
+                        headerWritten = true;
+                        continue;
+                    }
+
+                    String[] fields = currentLine.split(",");
+
+                    if (!fields[0].equalsIgnoreCase(nameToRemove)) {
+                        writer.write(currentLine);
+                        writer.newLine();
+                    }
                 }
             }
 
-            // Rename the temp file to the original file
-            if (!inputFile.delete()) {
-                System.out.println("Could not delete the original file");
+
+            System.out.println("Attempting to delete: " + inputFile.getAbsolutePath());
+            boolean deleteSuccess = inputFile.delete();
+            System.out.println("Delete returned: " + deleteSuccess);
+
+            if (!deleteSuccess) {
+                System.out.println("Could not delete the original file: " + inputFile.getAbsolutePath());
                 return;
             }
-            if (!tempFile.renameTo(inputFile)) {
-                System.out.println("Could not rename the temp file");
+
+            System.out.println("Attempting to rename: " + tempFile.getAbsolutePath() + " to " + inputFile.getAbsolutePath());
+            boolean renameSuccess = tempFile.renameTo(inputFile);
+            System.out.println("Rename returned: " + renameSuccess);
+
+            if (!renameSuccess) {
+                System.out.println("Could not rename the temp file: " + tempFile.getAbsolutePath());
+            } else {
+                System.out.println("Record removed successfully.");
             }
 
-            System.out.println("Record removed successfully.");
-
         } catch (IOException e) {
+            System.err.println("IO Error: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // Instance method to remove a student by name
     public void remove(Scanner scanner) {
         System.out.println("Enter the name of the student to remove:");
         String nameToRemove = scanner.nextLine();
         removeRecord(nameToRemove);
+    }
+
+    public void tanggal(String[] args) throws IOException {
+        String csvFilePath = "students.csv";
+        try (FileWriter writer = new FileWriter(csvFilePath)) {
+            writer.write("Name,Age,Grade\n");
+            writer.write("John,18,A\n");
+            writer.write("Jane,19,B\n");
+            writer.write("Peter,17,C\n");
+        }
+        Scanner scanner = new Scanner(System.in);
+        Olidan olidan = new Olidan(csvFilePath);
+        olidan.remove(scanner);
+        scanner.close();
     }
 }
